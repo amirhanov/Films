@@ -16,6 +16,21 @@ class FilmsCell: UITableViewCell {
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var posterImageView: UIImageView!
     
+    func configureWith(withModel model: Film) {
+        titleLabel.text = model.title
+        languageLabel.text = "Language: \(model.language)"
+        rateLabel.text = "Rate: \(model.vote))"
+        
+        posterImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(model.poster)")) { (image, error, cache, url) in
+            if (error != nil) {
+                self.startActivityIndicator()
+            } else {
+                self.posterImageView.image = image
+                self.stopActivityIndicator()
+            }
+        }
+    }
+    
     // MARK: - LifeCycle
     
     override func awakeFromNib() {
@@ -41,20 +56,5 @@ class FilmsCell: UITableViewCell {
     private func stopActivityIndicator() {
         self.activityIndicator.isHidden = true
         self.activityIndicator.stopAnimating()
-    }
-    
-    func configureWith(withModel model: Film) {
-        titleLabel.text = model.title
-        languageLabel.text = "Language: \(model.language)"
-        rateLabel.text = "Rate: \(model.vote))"
-        
-        posterImageView.sd_setImage(with: URL(string: model.poster)) { (image, error, cache, url) in
-            if (error != nil) {
-                self.startActivityIndicator()
-            } else {
-                self.posterImageView.image = image
-                self.stopActivityIndicator()
-            }
-        }
     }
 }

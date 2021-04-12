@@ -9,19 +9,31 @@ import UIKit
 import Alamofire
 import SDWebImage
 
+struct FilmCellViewModel {
+    
+}
+
 class FilmsController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     
-    let cellID = "cellID"
+    private let bundle = Bundle.main
+    private let cellID = "cellID"
+    private let apiKey = "67e0511a3fe36e56041dc931db60f810"
+    private let page = 1
+    private let activityIndicatorView = UIActivityIndicatorView()
     
-    var films: [Film] = []
+    private var films: [Film] = []
 
+    // MARK: - LifeCycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         fetchFilms()
         setupTableView()
         setupNavigationBar()
+        setupActivityIndicator()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -29,31 +41,39 @@ class FilmsController: UIViewController {
         setupNavigationBar()
     }
     
-    //MARK:- Setup NavigationBar
+    // MARK:- Private Methods
     
-    func setupNavigationBar() {
+    private func setupNavigationBar() {
         title = "Home"
     }
     
-    //MARK:- Setup TableView
-    
-    func setupTableView() {
+    private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
     }
     
-    //MARK:- Fetch Films
-    
-    func fetchFilms() {
-        let apiKey = "67e0511a3fe36e56041dc931db60f810"
-        let page = 1
-        let url = "https://api.themoviedb.org/3/movie/upcoming?api_key=\(apiKey)&page=\(page)"
+    private func setupActivityIndicator() {
+        activityIndicatorView.style = .medium
+        activityIndicatorView.center = view.center
         
+        view.addSubview(activityIndicatorView)
+        
+        activityIndicatorView.startAnimating()
+    }
+    
+    private func stopActivityIndicator() {
+        activityIndicatorView.isHidden = true
+        activityIndicatorView.stopAnimating()
+    }
+
+    private func fetchFilms() {
+        let url = "https://api.themoviedb.org/3/movie/upcoming?api_key=\(apiKey)&page=\(page)"
         AF.request(url).responseJSON { [self] response in
             switch response.result {
             case .success(let value):
                 if let responeValue = value as? [String : Any] {
                     if let responeFilms = responeValue["results"] as! [[String : Any]]? {
+                        
                         for film in responeFilms {
                             
                             let title = film["original_title"] as? String
@@ -64,8 +84,15 @@ class FilmsController: UIViewController {
                             let vote = film["vote_average"] as? Double
                             let popular = film["popularity"] as? Double
                             
-                            let film = Film(id: id!, overview: overview!, title: title!, language: language!, poster: poster!, popular: popular!, vote: vote!)
+                            let film = Film(id: id!,
+                                            overview: overview!,
+                                            title: title!,
+                                            language: language!,
+                                            poster: poster!,
+                                            popular: popular!,
+                                            vote: vote!)
                             films.append(film)
+                            stopActivityIndicator()
                             tableView.reloadData()
                         }
                     }
@@ -77,7 +104,7 @@ class FilmsController: UIViewController {
     }
 }
 
-//MARK:- Setup TableView Protocols
+// MARK:- UITableViewDelegate, UITableViewDataSource
 
 extension FilmsController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -88,13 +115,9 @@ extension FilmsController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as? FilmsCell else { return UITableViewCell() }
-        let section = films[indexPath.row]
+        let cell = bundle.loadNibNamed("FilmsCell", owner: self, options: nil)?.first as! FilmsCell
         
-        cell.rateLabel.text = "Rate: \(section.vote)"
-        cell.titleLabel.text = section.title
-        cell.languageLabel.text = "Language: \(section.language)"
-        cell.posterImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(section.poster)"))
+        cell.configureWith(withModel: films[indexPath.row])
         
         return cell
     }
@@ -107,3 +130,11 @@ extension FilmsController: UITableViewDelegate, UITableViewDataSource {
         return 96
     }
 }
+
+
+/*
+ Заметка:
+ 
+ 1. Порядок свойств: Public properties, Private properties, Init, Public method, Private method, Extension.
+
+*/

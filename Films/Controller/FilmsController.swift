@@ -9,19 +9,16 @@ import UIKit
 import Alamofire
 import SDWebImage
 
-struct FilmCellViewModel {
-    
-}
-
 class FilmsController: UIViewController {
     
-    @IBOutlet weak var tableView: UITableView!
+    // MARK: - Private Properties
     
     private let bundle = Bundle.main
     private let cellID = "cellID"
     private let apiKey = "67e0511a3fe36e56041dc931db60f810"
     private let page = 1
     private let activityIndicatorView = UIActivityIndicatorView()
+    private let tableView = UITableView()
     
     private var films: [Film] = []
 
@@ -31,11 +28,11 @@ class FilmsController: UIViewController {
         super.viewDidLoad()
         
         fetchFilms()
-        setupTableView()
+        setupTableVIew()
         setupNavigationBar()
         setupActivityIndicator()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setupNavigationBar()
@@ -43,13 +40,23 @@ class FilmsController: UIViewController {
     
     // MARK:- Private Methods
     
-    private func setupNavigationBar() {
-        title = "Home"
-    }
-    
-    private func setupTableView() {
+    private func setupTableVIew() {
+        view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.register(FilmsCell.self, forCellReuseIdentifier: cellID)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+    }
+    
+    private func setupNavigationBar() {
+        title = "Home"
     }
     
     private func setupActivityIndicator() {
@@ -91,6 +98,7 @@ class FilmsController: UIViewController {
                                             poster: poster!,
                                             popular: popular!,
                                             vote: vote!)
+                            
                             films.append(film)
                             stopActivityIndicator()
                             tableView.reloadData()
@@ -115,7 +123,7 @@ extension FilmsController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = bundle.loadNibNamed("FilmsCell", owner: self, options: nil)?.first as! FilmsCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! FilmsCell
         
         cell.configureWith(withModel: films[indexPath.row])
         

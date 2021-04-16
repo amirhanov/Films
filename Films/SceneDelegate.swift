@@ -15,7 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         let navigationController = UINavigationController()
-        let mainController = FilmsController()
+        let mainController = FilmsAssembly().configureModule()
         
         navigationController.viewControllers = [mainController]
         

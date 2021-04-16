@@ -52,7 +52,7 @@ class FilmsCell: UITableViewCell {
     
     // MARK: - LifeCycle
     
-    override func awakeFromNib() {
+    override func awakeFromNib() { // MARK: - не вызывается если верстаем кодом,  надо убрать
         super.awakeFromNib()
         
     }
@@ -86,9 +86,9 @@ class FilmsCell: UITableViewCell {
     
     // MARK: - Private Methods
     
-    private func setupView() {
+    private func setupView() { // Давай вынесем в отдельные методы : func addSubviews() , setupStackViews(), setupContraints()
         
-        addSubview(posterImageView)
+        contentView.addSubview(posterImageView)
         
         posterImageView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -99,11 +99,11 @@ class FilmsCell: UITableViewCell {
         ])
         
         stackView.alignment = .fill
-        stackView.distribution = .fillProportionally
+        stackView.distribution = .fill
         stackView.axis = .vertical
         stackView.spacing = 2
         
-        addSubview(stackView)
+        contentView.addSubview(stackView)
         
         stackView.translatesAutoresizingMaskIntoConstraints = false
         

@@ -52,11 +52,6 @@ class FilmsCell: UITableViewCell {
     
     // MARK: - LifeCycle
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        
-    }
-    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
@@ -69,7 +64,7 @@ class FilmsCell: UITableViewCell {
     
     // MARK: - Public Methods
     
-    func configureWith(withModel model: Film) {
+    func configureWith(withModel model: Films) {
         titleLabel.text = model.title
         languageLabel.text = "Language: \(model.language)"
         rateLabel.text = "Rate: \(model.vote)"
@@ -102,10 +97,9 @@ class FilmsCell: UITableViewCell {
         stackView.distribution = .fillProportionally
         stackView.axis = .vertical
         stackView.spacing = 2
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         addSubview(stackView)
-        
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             posterImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),

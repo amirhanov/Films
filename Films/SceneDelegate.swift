@@ -12,15 +12,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let scene = (scene as? UIWindowScene) else { return }
+        
+        window = UIWindow(frame: scene.coordinateSpace.bounds)
+        window?.windowScene = scene
         
         let navigationController = UINavigationController()
-        let mainController = FilmsController()
+        let assemblyBuilder = AssemblyModelBuilder()
+        let router = Router(navigationController: navigationController, assemblyBuilder: assemblyBuilder)
         
-        navigationController.viewControllers = [mainController]
-        
-        window = UIWindow(frame: windowScene.coordinateSpace.bounds)
-        window?.windowScene = windowScene
+        router.initionalViewController()
+         
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }

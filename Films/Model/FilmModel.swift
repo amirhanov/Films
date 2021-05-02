@@ -1,16 +1,20 @@
 //
-//  FilmModel.swift
+//  FilmDetailModel.swift
 //  Films
 //
-//  Created by Амирханов Рустам Аждарович on 05.04.2021.
+//  Created by Амирханов Рустам Аждарович on 01.05.2021.
 //
 
-struct Film {
-    let id:       Int
-    let overview: String
-    let title:    String
-    let language: String
-    let poster:   String
-    let popular:  Double
-    let vote:     Double
+import UIKit
+
+struct Film: Decodable {
+    let adult:        Bool
+    let budget:       Int
+    let homepage:     String
+    let overview:     String
+    let release_date: String
+    let vote_count:   Int
+    let vote_average: Double
+    let revenue:      Int
+    let poster_path:  String
 }

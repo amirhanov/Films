@@ -6,28 +6,25 @@
 //
 
 import UIKit
-import Alamofire
 import SDWebImage
 
 class FilmsController: UIViewController {
     
     // MARK: - Private Properties
     
-    private let bundle = Bundle.main
     private let cellID = "cellID"
-    private let apiKey = "67e0511a3fe36e56041dc931db60f810"
-    private let page = 1
     private let activityIndicatorView = UIActivityIndicatorView()
     private let tableView = UITableView()
     
-    private var films: [Film] = []
+    // MARK:- Public Properties
+    
+    var presenter: FilmsViewPresenterProtocol!
 
     // MARK: - LifeCycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        fetchFilms()
         setupTableVIew()
         setupNavigationBar()
         setupActivityIndicator()
@@ -72,66 +69,22 @@ class FilmsController: UIViewController {
         activityIndicatorView.isHidden = true
         activityIndicatorView.stopAnimating()
     }
-
-    private func fetchFilms() {
-        let url = "https://api.themoviedb.org/3/movie/upcoming?api_key=\(apiKey)&page=\(page)"
-        AF.request(url).responseJSON { [self] response in
-            switch response.result {
-            case .success(let value):
-                if let responeValue = value as? [String : Any] {
-                    if let responeFilms = responeValue["results"] as! [[String : Any]]? {
-                        
-                        for film in responeFilms {
-                            
-                            let title = film["original_title"] as? String
-                            let id = film["id"] as? Int
-                            let poster = film["backdrop_path"] as? String
-                            let language = film["original_language"] as? String
-                            let overview = film["overview"] as? String
-                            let vote = film["vote_average"] as? Double
-                            let popular = film["popularity"] as? Double
-                            
-                            let film = Film(id: id!,
-                                            overview: overview!,
-                                            title: title!,
-                                            language: language!,
-                                            poster: poster!,
-                                            popular: popular!,
-                                            vote: vote!)
-                            
-                            films.append(film)
-                            stopActivityIndicator()
-                            tableView.reloadData()
-                        }
-                    }
-                }
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
-    }
 }
 
-// MARK:- UITableViewDelegate, UITableViewDataSource
+// MARK:- UITableViewDataSource
 
-extension FilmsController: UITableViewDelegate, UITableViewDataSource {
+extension FilmsController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if films.count != 0 {
-            return films.count
-        }
-        return 0
+        return presenter.films?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! FilmsCell
+        let model = presenter.films![indexPath.row]
         
-        cell.configureWith(withModel: films[indexPath.row])
+        cell.configureWith(withModel: model)
         
         return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -139,6 +92,30 @@ extension FilmsController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+// MARK:- UITableViewDelegate
+
+extension FilmsController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let film = presenter.films?[indexPath.row]
+        
+        presenter.tapOnTheFilm(film: film)
+        
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+// MARK:- FilmsViewProtocol
+
+extension FilmsController: FilmsViewProtocol {
+    func success() {
+        stopActivityIndicator()
+        tableView.reloadData()
+    }
+    
+    func failure(error: Error) {
+        print(error.localizedDescription)
+    }
+}
 
 /*
  Заметка:

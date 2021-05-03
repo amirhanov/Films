@@ -10,7 +10,6 @@ import SDWebImage
 
 class DetailController: UIViewController {
     
-
     // MARK: - Private Properties
     
     private let backgroundImageView = UIImageView()
@@ -76,7 +75,7 @@ class DetailController: UIViewController {
         super.viewDidLoad()
 
         setupUI()
-        presenter.setFilm()
+        presenter.viewDidLoad()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -173,6 +172,7 @@ class DetailController: UIViewController {
 // MARK:- DetailViewProtocol
 
 extension DetailController: DetailViewProtocol {
+    
     func setFilm(films: Films?) {
         titleLabel.text = presenter.films?.title
     }
@@ -184,4 +184,5 @@ extension DetailController: DetailViewProtocol {
     func failure(error: Error) {
         print(error.localizedDescription)
     }
+    
 }

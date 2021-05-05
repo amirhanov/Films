@@ -6,51 +6,54 @@
 //
 
 import UIKit
-import Foundation
+import Alamofire
 
-protocol FilmsViewProtocol: class {
-    func success()
-    func failure(error: Error)
+protocol FilmsControllerOutput: AnyObject {
+    func viewDidLoad()
+    func didSelectMovie(index at: Int)
 }
 
-protocol FilmsViewPresenterProtocol: class {
-    init(view: FilmsViewProtocol, network: NetworkServiceProtocol, router: FilmsRouterProtocol)
+class FilmsPresenter {
     
-    var films: [Films]? { get set }
+    // MARK: - Public Properties
     
-    func getFilms()
-    func tapOnTheFilm(film: Films?)
-}
+    weak var view: FilmsControllerInput?
+    var router: FilmsRouterInput?
+    var network: NetworkServiceProtocol!
+    
+    // MARK:  - Private Properties
+    
+    private var films = [Films]()
 
-class FilmsPresenter: FilmsViewPresenterProtocol {
-    weak var view: FilmsViewProtocol?
-    var router: FilmsRouterProtocol?
-    let network: NetworkServiceProtocol!
-    var films: [Films]?
+    // MARK: - Private Methods
     
-    required init(view: FilmsViewProtocol, network: NetworkServiceProtocol, router: FilmsRouterProtocol) {
-        self.view = view
-        self.network = network
-        self.router = router
-        getFilms()
-    }
-    
-    func getFilms() {
+    private func fetchFilms() {
         network.getFilms { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let films):
-                    self.films = films
-                    self.view?.success()
+                    self.films = films!
+                    self.view?.configureWith(model: .init(items: self.films))
                 case .failure(let error):
-                    self.view?.failure(error: error)
+                    print(error.localizedDescription)
                 }
+                self.view?.hideActivityIndicator()
             }
         }
     }
+}
+
+// MARK:- FilmsControllerOutput
+
+extension FilmsPresenter: FilmsControllerOutput {
+    func viewDidLoad() {
+        view?.showActivityIndicator()
+        fetchFilms()
+    }
     
-    func tapOnTheFilm(film: Films?) {
-        router?.showDetailController(films: film)
+    func didSelectMovie(index: Int) {
+        let film = films[index]
+        router?.showFilmDetails(film: film)
     }
 }

@@ -69,6 +69,9 @@ class NetworkService: NetworkServiceProtocol {
                     let release_date = responseValue["release_date"] as? String
                     let vote_average = responseValue["vote_average"] as? Double
                     let poster_path = responseValue["poster_path"] as? String
+                    let original_title = responseValue["original_title"] as? String
+                    let runtime = responseValue["runtime"] as? Int
+                    let tagline = responseValue["tagline"] as? String
                     
                     let detail = Film(adult: adult!,
                                       budget: budget!,
@@ -78,7 +81,10 @@ class NetworkService: NetworkServiceProtocol {
                                       vote_count: vote_count!,
                                       vote_average: vote_average!,
                                       revenue: revenue!,
-                                      poster_path: poster_path!)
+                                      poster_path: poster_path!,
+                                      original_title: original_title!,
+                                      runtime: runtime!,
+                                      tagline: tagline!)
                     
                     film = detail
                     complition(.success(film))

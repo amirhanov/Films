@@ -8,90 +8,145 @@
 import UIKit
 import SDWebImage
 
+struct DetailControllerViewModel {
+    let item: Film
+}
+
+protocol DetailControllerInput: AnyObject {
+    func hideActivityIndicator()
+    func showActivityIndicator()
+    func configureWith(model: DetailControllerViewModel)
+}
+
 class DetailController: UIViewController {
     
+    // MARK: - Public Properties
+    
+    var output: DetailControllerOutput!
+    var films: Films?
+    var id: Int?
 
     // MARK: - Private Properties
     
-    private let backgroundImageView = UIImageView()
-    private let watchButton = UIButton()
+    private var film: Film?
+    private let activityIndicatorView = UIActivityIndicatorView()
+    private let gradientLayer = CAGradientLayer()
+    private let gradientView = UIView()
+    private let colorTop = UIColor.clear.cgColor
+    private let colorBottom = UIColor.black.cgColor
     
-    private let rateLabel: UILabel = {
+    private let backgroundImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        return imageView
+    }()
+    
+    private let watchButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 10
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        button.setTitleColor(.black, for: .normal)
+        button.setTitle("Смотреть бесплатная версию", for: .normal)
+        button.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        button.imageEdgeInsets.left = -16
+        button.contentEdgeInsets.left = 16
+        button.tintColor = .black
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let subscribeButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 10
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        button.setTitleColor(.black, for: .normal)
+        button.setTitle("Подписка", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let taglineLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
-        label.backgroundColor = .white
-        label.layer.cornerRadius = 4
-        label.clipsToBounds = true
+        label.textAlignment = .center
+        label.textColor = .white
         label.font = .systemFont(ofSize: 14, weight: .medium)
         return label
     }()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
+        label.textAlignment = .center
         label.textColor = .white
-        label.font = .systemFont(ofSize: 24, weight: .semibold)
+        label.font = .systemFont(ofSize: 32, weight: .bold)
+        label.numberOfLines = 0
         return  label
     }()
     
-    private let releaseLabel: UILabel = {
+    private let detailLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .lightGray
-        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textAlignment = .center
+        label.textColor = UIColor.white.withAlphaComponent(0.7)
+        label.font = .systemFont(ofSize: 14, weight: .regular)
         return label
     }()
     
-    private let adultLabel: UILabel = {
+    private let priceLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
-        label.backgroundColor = .white
-        label.layer.cornerRadius = 4
-        label.clipsToBounds = true
-        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textAlignment = .center
+        label.textColor = UIColor.white.withAlphaComponent(0.7)
+        label.font = .systemFont(ofSize: 10, weight: .regular)
+        label.text = "7 дн. бесплатно, затем 199,00 ₽ в неделю"
+        label.numberOfLines = 1
         return label
     }()
     
-    private let imdbLabel: UILabel = {
+    private let overviewLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .black
-        label.backgroundColor = .orange
-        label.layer.cornerRadius = 4
-        label.clipsToBounds = true
-        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .white
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.numberOfLines = 3
         return label
     }()
     
-    private let gradientLayer = CAGradientLayer()
-    private let gradientView = UIView()
-    let colorTop = UIColor.clear.cgColor
-    let colorBottom = UIColor.black.cgColor
+    private let spaceView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        return view
+    }()
     
-    // MARK:- Public Properties
-    
-    var presenter: DetailViewPresenterProtocol!
-    var id: Int?
+    private let spaceeView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        return view
+    }()
     
     // MARK:- Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupUI()
-        presenter.setFilm()
+        commonInit()
+        output.viewDidLoad(id: id!)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
         setupNavigationBar()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
         restoreSetupNavigationBar()
     }
     
-    // MARK:- Private Methods
+    // MARK:- Init
     
-    private func setupUI() {
+    private func commonInit() {
         gradientLayer.colors = [colorTop, colorBottom]
         gradientLayer.frame = view.bounds
         gradientLayer.locations = [0, 1]
@@ -99,45 +154,28 @@ class DetailController: UIViewController {
         gradientView.layer.insertSublayer(gradientLayer, at: 0)
         
         view.addSubview(backgroundImageView)
+        view.addSubview(priceLabel)
+        view.addSubview(overviewLabel)
+        view.addSubview(watchButton)
+        view.addSubview(subscribeButton)
+        
         backgroundImageView.addSubview(gradientView)
         backgroundImageView.bringSubviewToFront(gradientView)
-        view.addSubview(watchButton)
-        
-        backgroundImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(presenter.films!.poster)"))
-        backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.frame = view.frame
-        backgroundImageView.clipsToBounds = true
-        
-        watchButton.backgroundColor = .red
-        watchButton.layer.cornerRadius = 10
-        watchButton.setTitle("WATCH NOW", for: .normal)
-        watchButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-        watchButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        rateLabel.text = "123"
-        adultLabel.text = "18+"
-        imdbLabel.text = "IMDb"
-        releaseLabel.text = "123"
-        
-        let contentStackView = UIStackView(arrangedSubviews: [
-            rateLabel,
-            adultLabel,
-            imdbLabel
-        ])
-        
-        contentStackView.alignment = .center
-        contentStackView.distribution = .fillProportionally
-        contentStackView.axis = .horizontal
-        contentStackView.spacing = 6
-        contentStackView.translatesAutoresizingMaskIntoConstraints = false
         
         let mainStackView = UIStackView(arrangedSubviews: [
+            taglineLabel,
             titleLabel,
-            contentStackView,
-            releaseLabel
+            detailLabel,
+            watchButton,
+            subscribeButton,
+            priceLabel,
+            overviewLabel
         ])
         
-        mainStackView.alignment = .center
+        mainStackView.setCustomSpacing(24, after: detailLabel)
+        mainStackView.setCustomSpacing(24, after: priceLabel)
+        mainStackView.alignment = .fill
         mainStackView.distribution = .fill
         mainStackView.axis = .vertical
         mainStackView.spacing = 6
@@ -146,42 +184,64 @@ class DetailController: UIViewController {
         view.addSubview(mainStackView)
         
         NSLayoutConstraint.activate([
-            watchButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            watchButton.widthAnchor.constraint(equalToConstant: view.frame.width - 32),
-            watchButton.heightAnchor.constraint(equalToConstant: 56),
-            watchButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -24),
+            watchButton.heightAnchor.constraint(equalToConstant: 44),
+            subscribeButton.heightAnchor.constraint(equalToConstant: 44),
             
-            mainStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mainStackView.widthAnchor.constraint(equalToConstant: view.frame.width - 32),
-            mainStackView.bottomAnchor.constraint(equalTo: watchButton.topAnchor, constant: -24),
+            mainStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            mainStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            mainStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
     }
+    
+    // MARK:- Private Methods
     
     private func setupNavigationBar() {
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
         navigationController?.navigationBar.isTranslucent = true
         navigationController?.view.backgroundColor = .clear
+        navigationController?.navigationBar.tintColor = UIColor.white
+        navigationItem.backBarButtonItem?.title = ""
     }
     
     private func restoreSetupNavigationBar() {
         navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
         navigationController?.navigationBar.shadowImage = nil
     }
+
+    private func setupActivityIndicator() {
+        activityIndicatorView.style = .medium
+        activityIndicatorView.center = view.center
+        
+        view.addSubview(activityIndicatorView)
+        
+        activityIndicatorView.startAnimating()
+    }
+    
+    private func stopActivityIndicator() {
+        activityIndicatorView.isHidden = true
+        activityIndicatorView.stopAnimating()
+    }
 }
 
-// MARK:- DetailViewProtocol
+// MARK:- DetailControllerInput
 
-extension DetailController: DetailViewProtocol {
-    func setFilm(films: Films?) {
-        titleLabel.text = presenter.films?.title
+extension DetailController: DetailControllerInput {
+    func hideActivityIndicator() {
+        stopActivityIndicator()
     }
     
-    func success() {
+    func showActivityIndicator() {
+        activityIndicatorView.startAnimating()
+    }
+    
+    func configureWith(model: DetailControllerViewModel) {
+        film = model.item
         
-    }
-    
-    func failure(error: Error) {
-        print(error.localizedDescription)
+        detailLabel.text = "Создан \(film!.release_date) • \(film!.runtime) мин. • Apple TV"
+        taglineLabel.text = film?.tagline
+        overviewLabel.text = film?.overview
+        titleLabel.text = film?.original_title
+        backgroundImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(film!.poster_path)"))
     }
 }

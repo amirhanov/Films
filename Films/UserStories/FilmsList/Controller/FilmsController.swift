@@ -8,25 +8,44 @@
 import UIKit
 import SDWebImage
 
+struct FilmsControllerViewModel {
+    let items: [Films]
+}
+
+protocol FilmsControllerInput: AnyObject {
+    func hideActivityIndicator()
+    func showActivityIndicator()
+    func configureWith(model: FilmsControllerViewModel)
+}
+
 class FilmsController: UIViewController {
+    
+    // MARK: - Public Properties
+    
+    var output: FilmsControllerOutput!
     
     // MARK: - Private Properties
     
+    private var refreshControl = UIRefreshControl()
     private let cellID = "cellID"
     private let activityIndicatorView = UIActivityIndicatorView()
     private let tableView = UITableView()
+    private var films = [Films]() {
+        didSet {
+            tableView.reloadData()
+        }
+    }
     
-    // MARK:- Public Properties
-    
-    var presenter: FilmsViewPresenterProtocol!
-
     // MARK: - LifeCycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        output.viewDidLoad()
+        
         setupTableVIew()
         setupNavigationBar()
+        setupRefreshControl()
         setupActivityIndicator()
     }
 
@@ -37,8 +56,23 @@ class FilmsController: UIViewController {
     
     // MARK:- Private Methods
     
+    private func setupRefreshControl() {
+        let attributedTitle = NSAttributedString(string: "Потяни меня вниз")
+        
+        refreshControl.attributedTitle = attributedTitle
+        refreshControl.addTarget(self, action: #selector(pool), for: .valueChanged)
+        
+        tableView.addSubview(refreshControl)
+    }
+    
+    @objc func pool() {
+        output.viewDidLoad()
+        refreshControl.endRefreshing()
+    }
+    
     private func setupTableVIew() {
         view.addSubview(tableView)
+        
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(FilmsCell.self, forCellReuseIdentifier: cellID)
@@ -75,12 +109,12 @@ class FilmsController: UIViewController {
 
 extension FilmsController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presenter.films?.count ?? 0
+        return films.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! FilmsCell
-        let model = presenter.films![indexPath.row]
+        let model = films[indexPath.row]
         
         cell.configureWith(withModel: model)
         
@@ -96,24 +130,29 @@ extension FilmsController: UITableViewDataSource {
 
 extension FilmsController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let film = presenter.films?[indexPath.row]
         
-        presenter.tapOnTheFilm(film: film)
+        let assemblyBuilder = AssemblyBuilder()
+        let detailController = assemblyBuilder.createDetail()
+        detailController.id = films[indexPath.row].id
+        navigationController?.pushViewController(detailController, animated: true)
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
-// MARK:- FilmsViewProtocol
+// MARK:- FilmsControllerInput
 
-extension FilmsController: FilmsViewProtocol {
-    func success() {
+extension FilmsController: FilmsControllerInput {
+    func hideActivityIndicator() {
         stopActivityIndicator()
-        tableView.reloadData()
     }
     
-    func failure(error: Error) {
-        print(error.localizedDescription)
+    func showActivityIndicator() {
+        activityIndicatorView.startAnimating()
+    }
+    
+    func configureWith(model: FilmsControllerViewModel) {
+        films = model.items
     }
 }
 

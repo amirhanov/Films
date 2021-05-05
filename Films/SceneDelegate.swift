@@ -14,15 +14,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
         
+        let navigationController = UINavigationController()
+        let assemblyBuilder = AssemblyBuilder()
+        let mainController = assemblyBuilder.createMain()
+        
+        navigationController.viewControllers = [mainController]
+        
         window = UIWindow(frame: scene.coordinateSpace.bounds)
         window?.windowScene = scene
-        
-        let navigationController = UINavigationController()
-        let assemblyBuilder = AssemblyModelBuilder()
-        let router = Router(navigationController: navigationController, assemblyBuilder: assemblyBuilder)
-        
-        router.initionalViewController()
-         
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }

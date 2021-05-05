@@ -66,8 +66,8 @@ class FilmsCell: UITableViewCell {
     
     func configureWith(withModel model: Films) {
         titleLabel.text = model.title
-        languageLabel.text = "Language: \(model.language)"
-        rateLabel.text = "Rate: \(model.vote)"
+        languageLabel.text = "Язык: \(model.language)"
+        rateLabel.text = "Рейтинг: \(model.vote)"
         
         posterImageView.sd_imageIndicator = SDWebImageActivityIndicator.gray
         posterImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(model.poster)")) { (image, error, cache, url) in

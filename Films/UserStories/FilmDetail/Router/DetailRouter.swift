@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+protocol DetailRouterInput {
+    
+}
+
+class DetailRouter: DetailRouterInput {
+    
+}

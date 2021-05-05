@@ -6,55 +6,48 @@
 //
 
 import UIKit
-import Foundation
+import Alamofire
 
-protocol DetailViewProtocol: class {
-    func setFilm(films: Films?)
-    func success()
-    func failure(error: Error)
+protocol DetailControllerOutput: AnyObject {
+    func viewDidLoad(id: Int)
 }
 
-protocol DetailViewPresenterProtocol: class {
-    init(view: DetailViewProtocol, network: NetworkServiceProtocol, router: FilmsRouterProtocol, films: Films?)
+class DetailPresenter {
     
-    var films: Films? { get set }
-    var film: Film? { get set }
+    // MARK: - Public Properties
     
-    func getDetail()
-    func setFilm()
-}
-
-class DetailPresenter: DetailViewPresenterProtocol {
-    weak var view: DetailViewProtocol?
-    var router: FilmsRouterProtocol?
-    let network: NetworkServiceProtocol!
-    var films: Films?
-    var film: Film?
+    weak var view: DetailControllerInput?
+    var router: DetailRouterInput?
+    var network: NetworkServiceProtocol!
     
-    required init(view: DetailViewProtocol, network: NetworkServiceProtocol, router: FilmsRouterProtocol, films: Films?) {
-        self.view = view
-        self.network = network
-        self.films = films
-        self.router = router
-        getDetail()
-    }
+    // MARK:  - Private Properties
     
-    func getDetail() {
-        network.getDetailForFilm(id: films!.id) { [weak self] result in
+    private var film: Film?
+    
+    // MARK: - Private Methods
+    
+    private func fetchDetail(id: Int) {
+        network.getDetailForFilm(id: id) { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
-                case .success(let film):
-                    self.film = film
-                    self.view?.success()
+                case .success(let detail):
+                    self.film = detail!
+                    self.view?.configureWith(model: .init(item: self.film!))
                 case .failure(let error):
-                    self.view?.failure(error: error)
+                    print(error.localizedDescription)
                 }
+                self.view?.hideActivityIndicator()
             }
         }
     }
-    
-    func setFilm() {
-        self.view?.setFilm(films: films)
+}
+
+// MARK: - DetailControllerOutput
+
+extension DetailPresenter: DetailControllerOutput {
+    func viewDidLoad(id: Int) {
+        view?.showActivityIndicator()
+        fetchDetail(id: id)
     }
 }

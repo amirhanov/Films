@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import SDWebImage
+import SDWebImage // TODO: - не нужен импорт
 
 struct FilmsControllerViewModel {
     let items: [Films]
@@ -27,7 +27,7 @@ class FilmsController: UIViewController {
     // MARK: - Private Properties
     
     private var refreshControl = UIRefreshControl()
-    private let cellID = "cellID"
+    private let cellID = "cellID" // TODO: - Создай enum Constants и добавь там переменную static let cellId и высоту ячейки тоже добавь в константы
     private let activityIndicatorView = UIActivityIndicatorView()
     private let tableView = UITableView()
     private var films = [Films]() {
@@ -130,10 +130,10 @@ extension FilmsController: UITableViewDataSource {
 
 extension FilmsController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        let assemblyBuilder = AssemblyBuilder()
+        // TODO: - лшиний пробел
+        let assemblyBuilder = AssemblyBuilder() // TODO: - роутинг должен идти через роутер, тоесть ты нажимаешь на ячейку идешь в презентер и оттуда в роутер 
         let detailController = assemblyBuilder.createDetail()
-        detailController.id = films[indexPath.row].id
+        detailController.id = films[indexPath.row].id // TODO: - ID нужно передать через assebly, ты можешь создать структуру например FilmDetailAsseblyConfiuration в которуб ты будешь прокидывать id, и в билдере сетить в презентер. 
         navigationController?.pushViewController(detailController, animated: true)
         
         tableView.deselectRow(at: indexPath, animated: true)

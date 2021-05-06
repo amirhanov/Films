@@ -13,6 +13,8 @@ protocol FilmsRouterInput {
 }
 
 class FilmsRouter: FilmsRouterInput {
+    // TODO: - добавь сюда weak view: ViewController, в твоем случае FilmsController и засеть его в ассембли
+    
     func showFilmDetails(film: Films) {
         
     }

@@ -13,4 +13,5 @@ protocol DetailRouterInput {
 
 class DetailRouter: DetailRouterInput {
     
+ 
 }

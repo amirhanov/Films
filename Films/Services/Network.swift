@@ -18,15 +18,16 @@ class NetworkService: NetworkServiceProtocol {
     
     private var films: [Films] = []
     private var film: Film?
+    private var genreName: String?
     
     func getFilms(complition: @escaping (Result<[Films]?, Error>) -> Void) {
         let url = "https://api.themoviedb.org/3/movie/upcoming?api_key=\(Constants.apiKey)&page=\(Constants.page)"
         AF.request(url).responseJSON { [self] response in
             switch response.result {
             case .success(let value):
-                if let responeValue = value as? [String : Any] {
-                    if let responeFilms = responeValue["results"] as! [[String : Any]]? {
-                        for film in responeFilms {
+                if let responseValue = value as? [String : Any] {
+                    if let responseFilms = responseValue["results"] as! [[String : Any]]? {
+                        for film in responseFilms {
                             let title = film["original_title"] as? String
                             let id = film["id"] as? Int
                             let poster = film["backdrop_path"] as? String
@@ -60,6 +61,11 @@ class NetworkService: NetworkServiceProtocol {
             switch resonse.result {
             case .success(let value):
                 if let responseValue = value as? [String : Any] {
+                    if let responeGenres = responseValue["genres"] as! [[String : Any]]? {
+                        for genre in responeGenres {
+                            genreName = genre["name"] as? String
+                        }
+                    }
                     let adult = responseValue["adult"] as? Bool
                     let revenue = responseValue["revenue"] as? Int
                     let budget = responseValue["budget"] as? Int
@@ -73,7 +79,8 @@ class NetworkService: NetworkServiceProtocol {
                     let runtime = responseValue["runtime"] as? Int
                     let tagline = responseValue["tagline"] as? String
                     
-                    let detail = Film(adult: adult!,
+                    let detail = Film(genre: genreName!,
+                                      adult: adult!,
                                       budget: budget!,
                                       homepage: homepage!,
                                       overview: overview!,

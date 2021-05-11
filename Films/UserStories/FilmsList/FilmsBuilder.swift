@@ -17,6 +17,9 @@ class AssemblyBuilder: AssemblyBuilderProtocol {
         presenter.view = controller
         presenter.router = router
         presenter.network = network
+        
+        router.view = controller
+        
         controller.output = presenter
         
         return controller

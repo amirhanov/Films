@@ -10,5 +10,4 @@ import Foundation
 
 protocol AssemblyBuilderProtocol {
     func createMain() -> FilmsController
-    func createDetail() -> DetailController
 }

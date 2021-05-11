@@ -18,7 +18,7 @@ class FilmsPresenter {
     // MARK: - Public Properties
     
     weak var view: FilmsControllerInput?
-    var router: FilmsRouterInput?
+    var router: FilmsRouter?
     var network: NetworkServiceProtocol!
     
     // MARK:  - Private Properties

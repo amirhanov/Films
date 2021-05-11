@@ -9,7 +9,7 @@ import UIKit
 import Alamofire
 
 protocol DetailControllerOutput: AnyObject {
-    func viewDidLoad(id: Int)
+    func viewDidLoad()
 }
 
 class DetailPresenter {
@@ -23,11 +23,18 @@ class DetailPresenter {
     // MARK:  - Private Properties
     
     private var film: Film?
+    private var filmID: Int
+    
+    // MARK:- Init
+    
+    init(filmID: Int) {
+        self.filmID = filmID
+    }
     
     // MARK: - Private Methods
     
-    private func fetchDetail(id: Int) {
-        network.getDetailForFilm(id: id) { [weak self] result in
+    private func fetchDetail() {
+        network.getDetailForFilm(id: filmID) { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
@@ -46,8 +53,8 @@ class DetailPresenter {
 // MARK: - DetailControllerOutput
 
 extension DetailPresenter: DetailControllerOutput {
-    func viewDidLoad(id: Int) {
+    func viewDidLoad() {
         view?.showActivityIndicator()
-        fetchDetail(id: id)
+        fetchDetail()
     }
 }

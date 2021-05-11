@@ -13,7 +13,13 @@ protocol FilmsRouterInput {
 }
 
 class FilmsRouter: FilmsRouterInput {
+
+    weak var view: FilmsController?
+    
     func showFilmDetails(film: Films) {
+        let detailController = DetailBuilder().createDetail(id: film.id)
         
+        view?.navigationController?.pushViewController(detailController, animated: true)
     }
 }
+

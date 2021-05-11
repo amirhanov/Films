@@ -7,16 +7,17 @@
 
 import Foundation
 
-extension AssemblyBuilder {
-    func createDetail() -> DetailController {
+class DetailBuilder {
+    func createDetail(id: Int) -> DetailController {
         let controller = DetailController()
-        let presenter = DetailPresenter()
+        let presenter = DetailPresenter(filmID: id)
         let router = DetailRouter()
         let network = NetworkService()
         
         presenter.view = controller
         presenter.router = router
         presenter.network = network
+        
         controller.output = presenter
         
         return controller

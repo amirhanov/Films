@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SDWebImage
 
 struct FilmsControllerViewModel {
     let items: [Films]
@@ -18,29 +17,38 @@ protocol FilmsControllerInput: AnyObject {
     func configureWith(model: FilmsControllerViewModel)
 }
 
-class FilmsController: UIViewController {
+protocol PassDataFromCollectionView {
+    func didSelectMovie(index at: Int)
+}
+
+class FilmsController: UIViewController{
     
     // MARK: - Public Properties
-    
+
     var output: FilmsControllerOutput!
     
     // MARK: - Private Properties
     
     private var refreshControl = UIRefreshControl()
-    private let cellID = "cellID"
     private let activityIndicatorView = UIActivityIndicatorView()
     private let tableView = UITableView()
+    
     private var films = [Films]() {
         didSet {
             tableView.reloadData()
         }
     }
     
+    private enum Constants {
+        static let cellID = "cellID"
+        static let heightForRow: CGFloat = 247
+    }
+    
     // MARK: - LifeCycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         output.viewDidLoad()
         
         setupTableVIew()
@@ -75,8 +83,10 @@ class FilmsController: UIViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(FilmsCell.self, forCellReuseIdentifier: cellID)
+        tableView.register(FilmsTableCell.self, forCellReuseIdentifier: Constants.cellID)
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.separatorStyle = .none
+        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 8))
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -109,20 +119,20 @@ class FilmsController: UIViewController {
 
 extension FilmsController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return films.count
+        return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! FilmsCell
-        let model = films[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellID, for: indexPath) as! FilmsTableCell
         
-        cell.configureWith(withModel: model)
+        cell.films = films
+        cell.passDelegate = self
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 96
+        return Constants.heightForRow
     }
 }
 
@@ -130,12 +140,6 @@ extension FilmsController: UITableViewDataSource {
 
 extension FilmsController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        let assemblyBuilder = AssemblyBuilder()
-        let detailController = assemblyBuilder.createDetail()
-        detailController.id = films[indexPath.row].id
-        navigationController?.pushViewController(detailController, animated: true)
-        
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
@@ -156,9 +160,8 @@ extension FilmsController: FilmsControllerInput {
     }
 }
 
-/*
- Заметка:
- 
- 1. Порядок свойств: Public properties, Private properties, Init, Public method, Private method, Extension.
-
-*/
+extension FilmsController: PassDataFromCollectionView {
+    func didSelectMovie(index: Int) {
+        output.didSelectMovie(index: index)
+    }
+}

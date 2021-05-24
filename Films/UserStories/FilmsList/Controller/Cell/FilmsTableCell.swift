@@ -8,10 +8,12 @@
 import UIKit
 import SDWebImage
 
+// TODO: - еще я не говорил, но если у тебя от класс не будет никто наследоваться то лучше добавлять final, это ускоряет работу приложения
 class FilmsTableCell: UITableViewCell {
     
     // MARK:- Public Properties
     
+    // TODO: - delegate должен быть сдабой ссылкой иначе будет retain cycle
     var passDelegate: PassDataFromCollectionView?
     var films = [Films]() {
         didSet {
@@ -31,7 +33,7 @@ class FilmsTableCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+        // TODO: - Перенечсти setup из layoutSubviews
     }
     
     override func layoutSubviews() {
@@ -45,6 +47,7 @@ class FilmsTableCell: UITableViewCell {
     // MARK:- Private Methods
     
     private func setupView() {
+        // TODO: - Разбить на отдельные методы: setupCollectionView, addSubviews и configureConstraints и уже эти методы добавить в setup. Старайся везде придерживаться такой практики. Функция должна выполнять одну единственную цель.
         collectionViewLayout.scrollDirection = .horizontal
         
         collectionView.backgroundColor = .clear
@@ -56,6 +59,8 @@ class FilmsTableCell: UITableViewCell {
         
         addSubview(collectionView)
         
+        
+        
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -65,7 +70,7 @@ class FilmsTableCell: UITableViewCell {
     }
 }
 
-// MARK:- UICollectionViewDataSource
+// MARK: - UICollectionViewDataSource
 
 extension FilmsTableCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

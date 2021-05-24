@@ -21,7 +21,7 @@ protocol PassDataFromCollectionView {
     func didSelectMovie(index at: Int)
 }
 
-class FilmsController: UIViewController{
+class FilmsController: UIViewController {
     
     // MARK: - Public Properties
 
@@ -79,6 +79,7 @@ class FilmsController: UIViewController{
     }
     
     private func setupTableVIew() {
+        // TODO: - Разбить на отдельные методы
         view.addSubview(tableView)
         
         tableView.delegate = self

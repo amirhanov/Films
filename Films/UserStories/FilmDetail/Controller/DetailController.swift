@@ -18,6 +18,7 @@ protocol DetailControllerInput: AnyObject {
     func configureWith(model: DetailControllerViewModel)
 }
 
+// TODO: - у тебя проседает отрисовка при скролле. Скорее всего проблема в стеквью, погугли что то типо stackview bad perfomance. Возможно нужно предзадать высоты для кнопок.
 class DetailController: UIViewController {
     
     // MARK: - Public Properties
@@ -131,7 +132,7 @@ class DetailController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         output.viewDidLoad()
-        setupTableVIew()
+        setupTableVIew() // TODO: - поравить нейминг
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -146,7 +147,7 @@ class DetailController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        gradientView.frame = backgroundImageView.frame
+        gradientView.frame = backgroundImageView.frame // TODO: - это точно нужно делать тут? 
     }
     
     // MARK:- Private Methods
@@ -180,7 +181,7 @@ class DetailController: UIViewController {
         navigationController?.view.backgroundColor = .clear
         navigationController?.navigationBar.tintColor = .white
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "share_outline_28"),
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "share_outline_28"), // TODO: - вынести в константу
                                                             style: .plain,
                                                             target: self,
                                                             action: #selector(shareButtonTapped))
@@ -207,6 +208,7 @@ class DetailController: UIViewController {
     }
     
     private func setupHeaderView() {
+        // TODO: - очень большая функция разбить на отдельные методы по смыслу. Функция должна делать одно конкретное действие, например добавлять сабвью или конфигурировать констрейнты
         headerView.frame = view.frame
         
         gradientLayer.colors = [colorTop, colorBottom]
@@ -270,21 +272,21 @@ extension DetailController: DetailControllerInput {
     }
     
     func showActivityIndicator() {
-        activityIndicatorView.startAnimating()
+        activityIndicatorView.startAnimating() // TODO: - Сделай отдельно метод где ты добавляешь индикатор и отдельно start и stop
     }
     
     func configureWith(model: DetailControllerViewModel) {
         film = model.item
         
-        detailLabel.text = "\(film!.genre) • \(film!.release_date)) • \(film!.runtime) мин."
+        detailLabel.text = "\(film!.genre) • \(film!.release_date)) • \(film!.runtime) мин." // TODO: - строку сформировть в презентере
         taglineLabel.text = film?.tagline
         overviewLabel.text = film?.overview
         titleLabel.text = film?.original_title
-        backgroundImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(film!.poster_path)"))
+        backgroundImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(film!.poster_path)")) // TODO: - сюда уже нужно передавть урл
     }
 }
 
-// MARK:- UITableViewDataSource
+// MARK: - UITableViewDataSource
 
 extension DetailController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -304,7 +306,7 @@ extension DetailController: UITableViewDataSource {
     }
 }
 
-// MARK:- UITableViewDelegate
+// MARK: - UITableViewDelegate
 
 extension DetailController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -312,7 +314,7 @@ extension DetailController: UITableViewDelegate {
     }
 }
 
-// MARK:- UIScrollViewDelegate
+// MARK: - UIScrollViewDelegate
 
 extension DetailController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

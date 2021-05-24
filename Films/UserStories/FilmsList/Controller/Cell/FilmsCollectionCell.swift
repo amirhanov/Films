@@ -7,12 +7,13 @@
 
 import UIKit
 import SDWebImage
-import Foundation
+import Foundation // TODO: - не смысла импортить Foundation если заипортил UIKit, он включает в себя Foundation
 
 class FimsCollectionCell: UICollectionViewCell {
     
-    //MARK:- Public Properties
+    // MARK:- Public Properties
     
+    // TODO: - Private
     let titleLabel : UILabel = {
         let label = UILabel()
         label.textColor = .black
@@ -23,6 +24,7 @@ class FimsCollectionCell: UICollectionViewCell {
         return label
     }()
     
+    // TODO: - Private
     let rateLabel : UILabel = {
         let label = UILabel()
         label.textColor = .lightGray
@@ -33,6 +35,7 @@ class FimsCollectionCell: UICollectionViewCell {
         return label
     }()
     
+    // TODO: - Private
     let overviewLabel : UILabel = {
         let label = UILabel()
         label.textColor = .lightGray
@@ -43,6 +46,7 @@ class FimsCollectionCell: UICollectionViewCell {
         return label
     }()
     
+    // TODO: - Private
     let posterImageView : UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -76,6 +80,9 @@ class FimsCollectionCell: UICollectionViewCell {
         titleLabel.text = model.title
         overviewLabel.text = model.overview
         posterImageView.sd_imageIndicator = SDWebImageActivityIndicator.gray
+        
+        
+        // TODO: - Вроде можно засетить картинку без комплишена, все равно ты не обрабатываешь результат
         posterImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(model.poster)")) { (image, error, cache, url) in
             if (error != nil) {
 
@@ -88,6 +95,7 @@ class FimsCollectionCell: UICollectionViewCell {
     // MARK:- Private Methods
     
     private func setupView() {
+        //   // TODO: - Разбить на отдельные методы: setupCollectionView, setupStackView, addSubviews и configureConstraints и уже эти методы добавить в setup. Старайся везде придерживаться такой практики. Функция должна выполнять одну единственную цель.
         addSubview(posterImageView)
 
         posterImageView.translatesAutoresizingMaskIntoConstraints = false

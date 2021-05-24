@@ -42,7 +42,7 @@ class DetailPresenter {
                     self.film = detail!
                     self.view?.configureWith(model: .init(item: self.film!))
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    print(error.localizedDescription) // TODO: - Давай добавим обработку ошибок, будем показывать UIAlertController с текстом ошибки P.S. работу можно проверить просто запихнув в сакссесс с дефолтным текстом 
                 }
                 self.view?.hideActivityIndicator()
             }

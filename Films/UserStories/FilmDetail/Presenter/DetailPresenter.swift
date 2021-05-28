@@ -24,6 +24,7 @@ class DetailPresenter {
     
     private var film: Film?
     private var filmID: Int
+    private var filmInfo: String?
     
     // MARK:- Init
     
@@ -40,9 +41,10 @@ class DetailPresenter {
                 switch result {
                 case .success(let detail):
                     self.film = detail!
-                    self.view?.configureWith(model: .init(item: self.film!))
+                    self.filmInfo = "\(detail!.genre.first!) • \(detail!.release_date) • \(detail!.runtime) min."
+                    self.view?.configureWith(model: .init(item: self.film!), filmInfo: self.filmInfo!)
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    self.view?.showErrorAlert(with: error.localizedDescription)
                 }
                 self.view?.hideActivityIndicator()
             }

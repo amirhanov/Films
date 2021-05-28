@@ -15,7 +15,8 @@ struct DetailControllerViewModel {
 protocol DetailControllerInput: AnyObject {
     func hideActivityIndicator()
     func showActivityIndicator()
-    func configureWith(model: DetailControllerViewModel)
+    func configureWith(model: DetailControllerViewModel, filmInfo: String)
+    func showErrorAlert(with text: String)
 }
 
 class DetailController: UIViewController {
@@ -32,14 +33,13 @@ class DetailController: UIViewController {
     private let activityIndicatorView = UIActivityIndicatorView()
     private let gradientLayer = CAGradientLayer()
     private let gradientView = UIView()
-    private let colorTop = UIColor.clear.cgColor
-    private let colorBottom = UIColor.black.cgColor
     
     private enum Constants {
         static let cellID = "cellID"
         static let heightForRow: CGFloat = 48
+        static let shareIcon = UIImage(named: "share_outline_28")
     }
-    
+
     private var backgroundImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -58,6 +58,7 @@ class DetailController: UIViewController {
         button.imageEdgeInsets.left = -16
         button.contentEdgeInsets.left = 16
         button.tintColor = .black
+        button.frame.size.height = 44
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -69,6 +70,7 @@ class DetailController: UIViewController {
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         button.setTitleColor(.black, for: .normal)
         button.setTitle("Subscription", for: .normal)
+        button.frame.size.height = 44
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -123,15 +125,30 @@ class DetailController: UIViewController {
         return view
     }()
     
-    private let mainStackView = UIStackView()
+    private let mainStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.alignment = .fill
+        stackView.distribution = .fill
+        stackView.axis = .vertical
+        stackView.spacing = 6
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
     private let dateFormatter = DateFormatter()
     
     // MARK:- Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         output.viewDidLoad()
-        setupTableVIew()
+        
+        setupGradientLayer()
+        addSubviews()
+        setupTableView()
+        setupStackView()
+        addConstraints()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -150,10 +167,19 @@ class DetailController: UIViewController {
     }
     
     // MARK:- Private Methods
-    
-    private func setupTableVIew() {
+
+    private func addSubviews() {
         view.addSubview(tableView)
         
+        headerView.addSubview(backgroundImageView)
+        headerView.addSubview(priceLabel)
+        headerView.addSubview(overviewLabel)
+        headerView.addSubview(watchButton)
+        headerView.addSubview(subscribeButton)
+        headerView.addSubview(mainStackView)
+    }
+    
+    private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.alwaysBounceVertical = false
@@ -162,15 +188,22 @@ class DetailController: UIViewController {
         tableView.tableHeaderView = headerView
         tableView.insetsContentViewsToSafeArea = false
         tableView.contentInsetAdjustmentBehavior = .never
-        
+    }
+    
+    private func addConstraints() {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            watchButton.heightAnchor.constraint(equalToConstant: 44),
+            subscribeButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            mainStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            mainStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            mainStackView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -24)
         ])
-        
-        setupHeaderView()
     }
     
     private func setupNavigationBar() {
@@ -180,8 +213,8 @@ class DetailController: UIViewController {
         navigationController?.view.backgroundColor = .clear
         navigationController?.navigationBar.tintColor = .white
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "share_outline_28"),
-                                                            style: .plain,
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image:  Constants.shareIcon,
+                                                            style:  .plain,
                                                             target: self,
                                                             action: #selector(shareButtonTapped))
     }
@@ -197,7 +230,10 @@ class DetailController: UIViewController {
         activityIndicatorView.center = view.center
         
         view.addSubview(activityIndicatorView)
-        
+    }
+    
+    private func startActivityIndicator() {
+        activityIndicatorView.isHidden = false
         activityIndicatorView.startAnimating()
     }
     
@@ -205,26 +241,22 @@ class DetailController: UIViewController {
         activityIndicatorView.isHidden = true
         activityIndicatorView.stopAnimating()
     }
-    
-    private func setupHeaderView() {
+  
+    private func setupGradientLayer() {
         headerView.frame = view.frame
         
-        gradientLayer.colors = [colorTop, colorBottom]
+        gradientLayer.colors = [UIColor.clear.cgColor, UIColor.black.cgColor]
         gradientLayer.frame = headerView.bounds
         gradientLayer.locations = [0, 1]
         gradientView.frame = backgroundImageView.frame
         gradientView.layer.insertSublayer(gradientLayer, at: 0)
         
-        headerView.addSubview(backgroundImageView)
-        headerView.addSubview(priceLabel)
-        headerView.addSubview(overviewLabel)
-        headerView.addSubview(watchButton)
-        headerView.addSubview(subscribeButton)
-        
         backgroundImageView.addSubview(gradientView)
         backgroundImageView.bringSubviewToFront(gradientView)
         backgroundImageView.frame = headerView.frame
-        
+    }
+    
+    private func setupStackView() {
         mainStackView.addArrangedSubview(taglineLabel)
         mainStackView.addArrangedSubview(titleLabel)
         mainStackView.addArrangedSubview(detailLabel)
@@ -234,22 +266,6 @@ class DetailController: UIViewController {
         mainStackView.addArrangedSubview(overviewLabel)
         mainStackView.setCustomSpacing(24, after: detailLabel)
         mainStackView.setCustomSpacing(24, after: priceLabel)
-        mainStackView.alignment = .fill
-        mainStackView.distribution = .fill
-        mainStackView.axis = .vertical
-        mainStackView.spacing = 6
-        mainStackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        headerView.addSubview(mainStackView)
-        
-        NSLayoutConstraint.activate([
-            watchButton.heightAnchor.constraint(equalToConstant: 44),
-            subscribeButton.heightAnchor.constraint(equalToConstant: 44),
-            
-            mainStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            mainStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            mainStackView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -24)
-        ])
     }
     
     // MARK:- OBJC Methods
@@ -265,22 +281,28 @@ class DetailController: UIViewController {
 // MARK:- DetailControllerInput
 
 extension DetailController: DetailControllerInput {
+    func showErrorAlert(with text: String) {
+        let aC = UIAlertController(title: nil, message: text, preferredStyle: .alert)
+        aC.addAction(UIAlertAction(title: "Close", style: .cancel))
+        present(aC, animated: true, completion: nil)
+    }
+    
     func hideActivityIndicator() {
         stopActivityIndicator()
     }
     
     func showActivityIndicator() {
-        activityIndicatorView.startAnimating()
+        startActivityIndicator()
     }
     
-    func configureWith(model: DetailControllerViewModel) {
+    func configureWith(model: DetailControllerViewModel, filmInfo: String) {
         film = model.item
         
-        detailLabel.text = "\(film!.genre) • \(film!.release_date)) • \(film!.runtime) мин."
+        detailLabel.text = filmInfo
         taglineLabel.text = film?.tagline
         overviewLabel.text = film?.overview
         titleLabel.text = film?.original_title
-        backgroundImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(film!.poster_path)"))
+        backgroundImageView.sd_setImage(with: URL(string: film!.poster_path))
     }
 }
 

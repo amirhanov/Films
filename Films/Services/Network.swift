@@ -12,13 +12,15 @@ import Foundation
 protocol NetworkServiceProtocol {
     func getFilms(complition: @escaping (Result<[Films]?, Error>) -> Void)
     func getDetailForFilm(id: Int, complition: @escaping (Result<Film?, Error>) -> Void)
+    func getTVShows(complition: @escaping (Result<[TVShows]?, Error>) -> Void)
 }
 
 class NetworkService: NetworkServiceProtocol {
     
     private var films: [Films] = []
     private var film: Film?
-    private var genreName: String?
+    private var genre: [String] = []
+    private var shows: [TVShows] = []
     
     func getFilms(complition: @escaping (Result<[Films]?, Error>) -> Void) {
         let url = "https://api.themoviedb.org/3/movie/upcoming?api_key=\(Constants.apiKey)&page=\(Constants.page)"
@@ -62,10 +64,12 @@ class NetworkService: NetworkServiceProtocol {
             case .success(let value):
                 if let responseValue = value as? [String : Any] {
                     if let responeGenres = responseValue["genres"] as! [[String : Any]]? {
-                        for genre in responeGenres {
-                            genreName = genre["name"] as? String
+                        for genreItems in responeGenres {
+                            let genreItem = genreItems["name"] as? String
+                            genre.append(genreItem!)
                         }
                     }
+                    
                     let adult = responseValue["adult"] as? Bool
                     let revenue = responseValue["revenue"] as? Int
                     let budget = responseValue["budget"] as? Int
@@ -79,7 +83,7 @@ class NetworkService: NetworkServiceProtocol {
                     let runtime = responseValue["runtime"] as? Int
                     let tagline = responseValue["tagline"] as? String
                     
-                    let detail = Film(genre: genreName!,
+                    let detail = Film(genre: genre,
                                       adult: adult!,
                                       budget: budget!,
                                       homepage: homepage!,
@@ -88,7 +92,7 @@ class NetworkService: NetworkServiceProtocol {
                                       vote_count: vote_count!,
                                       vote_average: vote_average!,
                                       revenue: revenue!,
-                                      poster_path: poster_path!,
+                                      poster_path: "https://image.tmdb.org/t/p/w500\(poster_path!)",
                                       original_title: original_title!,
                                       runtime: runtime!,
                                       tagline: tagline!)
@@ -101,4 +105,37 @@ class NetworkService: NetworkServiceProtocol {
             }
         }
     }
+    
+    func getTVShows(complition: @escaping (Result<[TVShows]?, Error>) -> Void) {
+        let url = "https://api.themoviedb.org/3/tv/popular?api_key=\(Constants.apiKey)&language=\(Constants.language)"
+        AF.request(url).responseJSON { [self] response in
+            switch response.result {
+            case .success(let value):
+                if let responseValue = value as? [String : Any] {
+                    if let responseShows = responseValue["results"] as! [[String : Any]]? {
+                        for show in responseShows {
+                            let name = show["name"] as? String
+                            let id = show["id"] as? Int
+                            let backdrop_path = show["backdrop_path"] as? String
+                            
+                            let show = TVShows(id: id!,
+                                               name: name!,
+                                               backdrop_path: "https://image.tmdb.org/t/p/w500\(backdrop_path!)")
+                            
+                            shows.append(show)
+                        }
+                        complition(.success(shows))
+                    }
+                }
+            case .failure(let error):
+                complition(.failure(error))
+            }
+        }
+    }
 }
+
+
+
+
+
+

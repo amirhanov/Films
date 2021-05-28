@@ -24,6 +24,7 @@ class FilmsPresenter {
     // MARK:  - Private Properties
     
     private var films = [Films]()
+    private var shows = [TVShows]()
 
     // MARK: - Private Methods
     
@@ -42,6 +43,22 @@ class FilmsPresenter {
             }
         }
     }
+    
+    private func fetchTVShows() {
+        network.getTVShows { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let shows):
+                    self.shows = shows!
+                    self.view?.configureShowsWith(model: .init(items: self.shows))
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+                self.view?.hideActivityIndicator()
+            }
+        }
+    }
 }
 
 // MARK:- FilmsControllerOutput
@@ -50,6 +67,7 @@ extension FilmsPresenter: FilmsControllerOutput {
     func viewDidLoad() {
         view?.showActivityIndicator()
         fetchFilms()
+        fetchTVShows()
     }
     
     func didSelectMovie(index: Int) {

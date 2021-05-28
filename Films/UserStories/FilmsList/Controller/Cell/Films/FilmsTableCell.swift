@@ -8,11 +8,11 @@
 import UIKit
 import SDWebImage
 
-class FilmsTableCell: UITableViewCell {
+final class FilmsTableCell: UITableViewCell {
     
     // MARK:- Public Properties
     
-    var passDelegate: PassDataFromCollectionView?
+    weak var passDelegate: PassDataFromCollectionView?
     var films = [Films]() {
         didSet {
             collectionView.reloadData()
@@ -25,7 +25,8 @@ class FilmsTableCell: UITableViewCell {
     private enum Constants {
         static let cellID = "cellID"
     }
-    lazy private var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewLayout)
+    lazy private var collectionView: UICollectionView = UICollectionView(frame: .zero,
+                                                                         collectionViewLayout: collectionViewLayout)
     
     // MARK: - LifeCycle
     
@@ -35,7 +36,9 @@ class FilmsTableCell: UITableViewCell {
     }
     
     override func layoutSubviews() {
-        setupView()
+        setupCollectionView()
+        addSubviews()
+        addConstraints()
     }
     
     required init?(coder: NSCoder) {
@@ -43,8 +46,12 @@ class FilmsTableCell: UITableViewCell {
     }
     
     // MARK:- Private Methods
+ 
+    private func addSubviews() {
+        addSubview(collectionView)
+    }
     
-    private func setupView() {
+    private func setupCollectionView() {
         collectionViewLayout.scrollDirection = .horizontal
         
         collectionView.backgroundColor = .clear
@@ -53,9 +60,9 @@ class FilmsTableCell: UITableViewCell {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        
-        addSubview(collectionView)
-        
+    }
+    
+    private func addConstraints() {
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),

@@ -18,7 +18,7 @@ class FilmsRouter: FilmsRouterInput {
     
     func showFilmDetails(film: Films) {
         let detailController = DetailBuilder().createDetail(id: film.id)
-        
+        detailController.hidesBottomBarWhenPushed = true
         view?.navigationController?.pushViewController(detailController, animated: true)
     }
 }

@@ -17,12 +17,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let navigationController = UINavigationController()
         let assemblyBuilder = AssemblyBuilder()
         let mainController = assemblyBuilder.createMain()
+        let tabBarController = UITabBarController()
         
         navigationController.viewControllers = [mainController]
+        navigationController.tabBarItem = UITabBarItem(title: "Home",
+                                                       image: UIImage(systemName: "play.tv"),
+                                                       tag: 0)
+        
+        tabBarController.viewControllers = [navigationController]
         
         window = UIWindow(frame: scene.coordinateSpace.bounds)
         window?.windowScene = scene
-        window?.rootViewController = navigationController
+        window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
     }
 
@@ -35,4 +41,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
 }
-

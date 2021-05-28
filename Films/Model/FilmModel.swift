@@ -8,7 +8,7 @@
 import UIKit
 
 struct Film: Decodable {
-    let genre:          String
+    let genre:          [String]
     let adult:          Bool
     let budget:         Int
     let homepage:       String

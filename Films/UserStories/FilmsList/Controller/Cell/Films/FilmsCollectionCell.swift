@@ -7,13 +7,12 @@
 
 import UIKit
 import SDWebImage
-import Foundation
 
 class FimsCollectionCell: UICollectionViewCell {
     
-    //MARK:- Public Properties
+    //MARK:- Private Properties
     
-    let titleLabel : UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 16)
@@ -23,7 +22,7 @@ class FimsCollectionCell: UICollectionViewCell {
         return label
     }()
     
-    let rateLabel : UILabel = {
+    private let rateLabel: UILabel = {
         let label = UILabel()
         label.textColor = .lightGray
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -33,7 +32,7 @@ class FimsCollectionCell: UICollectionViewCell {
         return label
     }()
     
-    let overviewLabel : UILabel = {
+    private let overviewLabel: UILabel = {
         let label = UILabel()
         label.textColor = .lightGray
         label.font = UIFont.systemFont(ofSize: 13)
@@ -43,7 +42,7 @@ class FimsCollectionCell: UICollectionViewCell {
         return label
     }()
     
-    let posterImageView : UIImageView = {
+    private let posterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.layer.borderWidth = 0.5
@@ -52,7 +51,18 @@ class FimsCollectionCell: UICollectionViewCell {
         imageView.layer.cornerRadius = 6
         imageView.backgroundColor = .lightGray
         imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
+    }()
+    
+    private let stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.alignment = .leading
+        stackView.distribution = .fill
+        stackView.axis = .vertical
+        stackView.spacing = 1
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
     }()
     
     // MARK: - LifeCycle
@@ -66,7 +76,9 @@ class FimsCollectionCell: UICollectionViewCell {
     }
     
     override func layoutSubviews() {
-        setupView()
+        setupStackView()
+        addSubviews()
+        addConstraints()
     }
     
     // MARK: - Public Methods
@@ -75,37 +87,23 @@ class FimsCollectionCell: UICollectionViewCell {
         rateLabel.text = "IMDb: \(model.vote)"
         titleLabel.text = model.title
         overviewLabel.text = model.overview
-        posterImageView.sd_imageIndicator = SDWebImageActivityIndicator.gray
-        posterImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(model.poster)")) { (image, error, cache, url) in
-            if (error != nil) {
-
-            } else {
-                self.posterImageView.image = image
-            }
-        }
+        posterImageView.sd_setImage(with: URL(string: "https://image.tmdb.org/t/p/w500\(model.poster)"))
     }
     
     // MARK:- Private Methods
     
-    private func setupView() {
+    private func addSubviews() {
         addSubview(posterImageView)
-
-        posterImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let stackView = UIStackView(arrangedSubviews: [
-            rateLabel,
-            titleLabel,
-            overviewLabel
-        ])
-
-        stackView.alignment = .leading
-        stackView.distribution = .fill
-        stackView.axis = .vertical
-        stackView.spacing = 1
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-
         addSubview(stackView)
-        
+    }
+    
+    private func setupStackView() {
+        stackView.addArrangedSubview(rateLabel)
+        stackView.addArrangedSubview(titleLabel)
+        stackView.addArrangedSubview(overviewLabel)
+    }
+    
+    private func addConstraints() {
         NSLayoutConstraint.activate([
             posterImageView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             posterImageView.leadingAnchor.constraint(equalTo: leadingAnchor),

@@ -202,7 +202,7 @@ class DetailController: UIViewController {
             
             mainStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             mainStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            mainStackView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -24)
+            mainStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
     }
     

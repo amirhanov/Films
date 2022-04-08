@@ -32,17 +32,19 @@ class NetworkService: NetworkServiceProtocol {
                         for film in responseFilms {
                             let title = film["original_title"] as? String
                             let id = film["id"] as? Int
-                            let poster = film["backdrop_path"] as? String
+                            let poster = film["poster_path"] as? String
                             let language = film["original_language"] as? String
                             let overview = film["overview"] as? String
                             let vote = film["vote_average"] as? Double
                             let popular = film["popularity"] as? Double
                             
+                            print(responseFilms)
+                            
                             let film = Films(id: id!,
                                             overview: overview!,
                                             title: title!,
                                             language: language!,
-                                            poster: poster!,
+                                            poster: poster ?? "",
                                             popular: popular!,
                                             vote: vote!)
                             
@@ -120,7 +122,7 @@ class NetworkService: NetworkServiceProtocol {
                             
                             let show = TVShows(id: id!,
                                                name: name!,
-                                               backdrop_path: "https://image.tmdb.org/t/p/w500\(backdrop_path!)")
+                                               backdrop_path: "https://image.tmdb.org/t/p/w500\(backdrop_path ?? "")")
                             
                             shows.append(show)
                         }
